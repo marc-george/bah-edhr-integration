@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>bah-edhr-integration demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../bah-edhr-integration.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+      .vertical-section-container {
+        width: 1024px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vertical-section-container">
+      <h3>Basic bah-edhr-integration demo</h3>
+      <demo-snippet>
+        <template>
+          <bah-edhr-integration
+          token="Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiI0OTI5ZGNjY2Y0NWE0Yzc0YmUzNTcwYmI2NTljNmM2MCIsInN1YiI6IjQ3NTNhMjgwLTY2YTItNDRkYS05YjA2LTc4ZjJiOGI3MzA2YiIsInNjb3BlIjpbImcwMTAwMjA4NiIsImcwMDk4Mjg0MCIsIm9wZW5pZCIsImcwMDMxMTU3OCIsImcwMDkyOTgyMCIsImcwMTE5MjYxMCIsImcwMTAxNDM2NyIsImcwMTE1MzUwMSIsImcwMDk5MDQwOSIsImcwMTAxMzU2NSJdLCJjbGllbnRfaWQiOiJoZWFsdGhjYXJlX2JyaWxsaWFudCBhcHBzIGh1YiBkZXZfZGV2IiwiY2lkIjoiaGVhbHRoY2FyZV9icmlsbGlhbnQgYXBwcyBodWIgZGV2X2RldiIsImF6cCI6ImhlYWx0aGNhcmVfYnJpbGxpYW50IGFwcHMgaHViIGRldl9kZXYiLCJncmFudF90eXBlIjoiYXV0aG9yaXphdGlvbl9jb2RlIiwidXNlcl9pZCI6IjQ3NTNhMjgwLTY2YTItNDRkYS05YjA2LTc4ZjJiOGI3MzA2YiIsIm9yaWdpbiI6ImdlLXNzby1ncm91cHMiLCJ1c2VyX25hbWUiOiIyMTI0NDU4NDYiLCJlbWFpbCI6ImthbGViLm1ja2VsdmV5QGdlLmNvbSIsImF1dGhfdGltZSI6MTUyNDEzOTM5MiwicmV2X3NpZyI6IjU2NGIyYzliIiwiaWF0IjoxNTI0MTM5MzkzLCJleHAiOjE1MjQxNDY1OTIsImlzcyI6Imh0dHBzOi8vYThhMmZmYzQtYjA0ZS00ZWMxLWJmZWQtN2E1MWRkNDA4NzI1LnByZWRpeC11YWEucnVuLmF3cy11c3cwMi1wci5pY2UucHJlZGl4LmlvL29hdXRoL3Rva2VuIiwiemlkIjoiYThhMmZmYzQtYjA0ZS00ZWMxLWJmZWQtN2E1MWRkNDA4NzI1IiwiYXVkIjpbIm9wZW5pZCIsImhlYWx0aGNhcmVfYnJpbGxpYW50IGFwcHMgaHViIGRldl9kZXYiXX0.s73zVcn43-umfrZhB_ZmdcY96Pj-sVVd0OicGUjDJLwNJ1H_PH_gRmosB3bkJu8KsMGtvS0ZqQ7SjYOqCBijFqxrQntrk0HthTOi8iSfFoFFbnE0OT1c8fEIljzoACu6qwADvZju1vmt-PRAfqbdEK4j6tMF9ltDEY0zoTmodgRKXepCCy2qJtIB6irm1gz47ROn-K3X0U82HnuX813w5cRGNIXinmEuYU6o8tSEUH0RlXYrECqvYj0hH9kbPe27Wdd2TJl03zZiMIgCTvvzAiJbpFbSKkJJnKU1xfHTWMyDrJVwKQTtipKlUEmaFmbOuKG_6btdf6XTCgNzJ57qvQ"
+          root-url="https://test-source-alert-processor.run.aws-usw02-pr.ice.predix.io"
+          ></bah-edhr-integration>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>

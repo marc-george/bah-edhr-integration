@@ -1,0 +1,189 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="css/bah-edhr-integration-styles.html">
+<link rel="import" href="../bah-utility/bah-utility.html">
+<link rel="import" href="../bah-loading-message/bah-loading-message.html">
+<link rel="import" href="../source-alert-service/source-alert-service.html">
+<link rel="import" href="../px-data-table/px-data-table.html">
+<link rel="import" href="../common-imports/lodash.html">
+
+<!--
+`bah-filter`
+
+A filter component is meant to give the ability to search and narrow a general list of items to those that are specific to
+        to a user's needs.
+
+@demo demo/index.html
+-->
+<dom-module id="bah-edhr-integration">
+	<template>
+    <style include="bah-edhr-integration-styles"></style>
+
+    <bah-utility
+      id="bahUtility">
+		</bah-utility>
+
+		<source-alert-service
+			id="sourceAlertService"
+			root-url="[[rootUrl]]"
+			token="[[token]]">
+		</source-alert-service>
+
+		<div id="wrapperDiv" class="u-pt background--white">
+
+			<div class="flex flex--row flex--justify">
+				<div class="u-m u-p right btn--box" style="width: 30%;"></div>
+				<div class="u-m u-p center width--full" style="text-align: center;">
+					<span class="heading--page delta">eDHR Integration</span>
+				</div>
+
+				<div class="u-m u-p right btn--box" style="width: 30%;">
+					<div class="btn--group float--right">
+							<button class="btn btn--primary" on-class="{'btn--disabled': createAlertDisabled}" on-click="_saveRouteMappings">Save</button>
+					</div>
+				</div>
+			</div>
+
+			<px-modal
+				id="cancelModal"
+				modal-heading="Confirm cancel"
+				btn-modal-positive="Yes, I want to cancel"
+				btn-modal-negative="No, I do not want to cancel">
+				<div class="zeta">
+					Any incomplete mappings will not be saved. Do you wish to continue?
+				</div>
+			</px-modal>
+
+			<div class="u-m">
+				<div class="u-mb">
+					<label>Required Field<span style="color:red"> *</span></label>
+				</div>
+
+				<div>
+					<!-- Integration Details Block -->
+					<div class="u-pb- block-stack">
+						<div class="flex flex--row flex--left">
+							<div>
+								<span class="header-info caps u-pr- u-mt">Integration Details</span>
+							</div>
+							<div class="width--full line"></div>
+						</div>
+						<div class="u-mt flex flex--row flex--left">
+							<div class="u-pr++">
+								<label for="nameInput" class="">Name<span style="color:red"> *</span></label>
+								<input id="nameInput" placeholder="eDHR Integration" class="text-input input--huge" type="text" readonly="">
+							</div>
+							<div class="u-pr++">
+								<label for="typeInput" class="">Integration Type</label>
+								<input id="typeInput" placeholder="eDHR Integration" class="text-input input--huge" type="text" disabled="">
+							</div>
+						</div>
+					</div>
+
+					<!-- Associated Routes Block -->
+					<div class="u-mt++ u-pb- block-stack">
+						<div class="flex flex--row flex--left">
+							<div>
+								<span class="header-info caps u-pr- u-mt">Associated Routes</span>
+							</div>
+							<div class="width--full line"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Data Ingestion Mappings -->
+			<div>
+				<template is="dom-if" if="[[!_loadingMappings.isLoading]]">
+					<div class="layout">
+						<div class="layout__item u-m" style="overflow:hide">
+							<px-data-table
+								id="routeMappingTable"
+								table-data="{{_routeMappingsData}}"
+								striped="true"
+								table-rows="true"
+								filterable="true"
+								sortable="true"
+								on-px-cell-click="_dropdownItemChanged">
+
+								<px-data-table-column
+									name="id"
+									label="ID"
+									hide>
+								</px-data-table-column>
+
+								<px-data-table-column
+									name="sourceId"
+									label="Route"
+									filterable
+									sortable>
+								</px-data-table-column>
+
+								<px-data-table-column
+									name="sourceName"
+									label="Source Name"
+									hide>
+								</px-data-table-column>
+
+								<px-data-table-column
+									name="siteId"
+									label="Site ID"
+									hide>
+								</px-data-table-column>
+
+								<px-data-table-column
+									name="locationId"
+									label="Location"
+									type="dropdown"
+									filterable
+									sortable
+									dropdown-items='{{_mappedLocations}}'>
+								</px-data-table-column>
+
+								<px-data-table-column
+									id="alertTypeCol"
+									name="alertType"
+									label="Alert Type"
+									type="dropdown"
+									filterable
+									sortable
+									dropdown-items='{{_mappedAlertTypes}}'>
+								</px-data-table-column>
+
+								<px-data-table-column
+									name="alertDefinitionId"
+									label="Alert Definition"
+									type="dropdown"
+									filterable
+									sortable
+									dropdown-items='{{_mappedAlertDefinitions}}'>
+								</px-data-table-column>
+
+								<px-data-table-column
+									name="integration"
+									label="Integration"
+									hide>
+								</px-data-table-column>
+							</px-data-table>
+						</div>
+					</div>
+				</template>
+				<div class="flex flex--row flex--center">
+					<template is="dom-if" if="[[_loadingMappings.isLoading]]">
+						<bah-loading-message
+							show-loading="true"
+							loading-message="[[_loadingMappings.loadingMessage]]"
+							loading-title=""
+							show-error="[[_loadingMappings.hasError]]"
+							error-message="[[_loadingMappings.errorMessage]]"
+							error-message-title="[[_loadingMappings.errorTitle]]">
+						</bah-loading-message>
+					</template>
+				</div>
+				<!-- Empty div for flexbox purposes -->
+				<div></div>
+			</div>
+		</div>
+	</template>
+	<script type="text/javascript" src="js/bah-edhr-integration.js"></script>
+</dom-module>

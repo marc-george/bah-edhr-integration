@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>bah-edhr-integration test</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../bah-edhr-integration.html">
+  </head>
+  <body>
+    <test-fixture id="basic">
+      <template>
+        <bah-edhr-integration></bah-edhr-integration>
+      </template>
+    </test-fixture>
+
+    <script>
+      describe('bah-edhr-integration', function() {
+        // global variables
+        var selectedSite = {
+          'userSiteSubscriptionId': 290,
+          'siteName': 'Alagaesia',
+          'siteDescription': 'Kaleb\'s Test Plant based on the Inheritance Cycle books',
+          'siteId': 'e88a6523-06a3-477d-8d75-9bcc6617491f',
+          'enterprise': 'GE_Healthcare',
+          'id': 'e88a6523-06a3-477d-8d75-9bcc6617491f',
+          'name': 'Alagaesia',
+          'description': 'Kaleb\'s Test Plant based on the Inheritance Cycle books',
+          'isOpenable': true,
+          'type': 'site'
+        }
+
+        var unmappedRouteData = [
+          {
+            'id': 234598,
+            'sourceId': 872345901,
+            'sourceName': 'FLO_1.5T_Bucking_Coil_Wind',
+            'siteId': 'e88a6523-06a3-477d-8d75-9bcc6617491f',
+            'alertDefinitionId': null
+          },
+          {
+            'id': 234238,
+            'sourceId': 872345901,
+            'sourceName': 'FLO_CC_Drum_Assy',
+            'siteId': 'e88a6523-06a3-477d-8d75-9bcc6617491f',
+            'alertDefinitionId': null
+          }
+         ]
+
+        beforeEach(function() {
+          element = fixture('basic');
+        });
+
+        describe('instantiating', function () {
+          it('should instantiate without errors', function() {
+            assert.equal(element.is, 'bah-edhr-integration');
+          });
+        });
+
+        describe('_checkDataLoaded works correctly', function () {
+          it('should not set data loaded without mapped locations', function() {
+            element._mappedLocations = null;
+            element._mappedAlertTypes = [];
+            element._mappedAlertDefinitions = [];
+            assert.isFalse(element._dataLoaded);
+          });
+          it('should not set data loaded without mapped alert types', function() {
+            element._mappedLocations = [];
+            element._mappedAlertTypes = null;
+            element._mappedAlertDefinitions = [];
+            assert.isFalse(element._dataLoaded);
+          });
+          it('should not set data loaded without mapped alert definitions', function() {
+            element._mappedLocations = [];
+            element._mappedAlertTypes = [];
+            element._mappedAlertDefinitions = null;
+            assert.isFalse(element._dataLoaded);
+          });
+          it('should set data loaded to true with proper info', function() {
+            element._mappedLocations = [];
+            element._mappedAlertTypes = [];
+            element._mappedAlertDefinitions = [];
+            assert.isTrue(element._dataLoaded);
+          });
+        });
+
+        describe('_getRouteMappingsForSite works correctly', function() {
+          beforeEach(function() {
+            // Make a fake XMLHttpRequest object
+            xhr = sinon.useFakeXMLHttpRequest();
+            requests = [];
+
+            xhr.onCreate = function (xhr) {
+              requests.push(xhr);
+            };
+          });
+
+          // Cleanup after testing
+          afterEach(function () {
+            xhr.restore();
+          });
+
+          it('should fail to get source mappings for an empty site', function(done) {
+            //create needed elements
+            var promise = element._getRouteMappingsForSite();
+            assert.strictEqual(promise, undefined);
+            done();
+          });
+
+          it('should get an empty array of source mappings for a site', function(done) {
+            //create needed elements
+            element.selectedSite = selectedSite;
+            var promise = element._getRouteMappingsForSite(selectedSite);
+            //build request response
+            requests[1].respond(200, {'Content-Type': 'application/json'}, JSON.stringify({'data': []}));
+
+            promise.then(function(response) {
+              element.debounce('waitForCall', function() {
+                assert.isNotNull(response);
+                assert.strictEqual(response.data.length, 0);
+                assert.strictEqual(element._loadingMappings.isLoading, false);
+                assert.strictEqual(element._loadingMappings.hasError, true);
+                assert.strictEqual(element._loadingMappings.errorMessage, 'No mappings found for this site');
+                done();
+              })
+            });
+          });
+
+          it('should show received error message when failed to retrieve source mappings', function(done){
+            element.selectedSite = selectedSite;
+            var promise = element._getRouteMappingsForSite(selectedSite);
+            var alertSpy = sinon.spy(element.querySelector('#bahUtility'), 'alert');
+
+            requests[0].respond(401, {'Content-Type': 'application/json'}, JSON.stringify({message:'error'}));;
+
+            promise.then(function() {},
+             function(error) {
+              element.debounce('waitForCall', function() {
+              // verify we respond with error message if there is one
+              assert.isTrue(alertSpy.called);
+              assert.isTrue(alertSpy.calledWith('Error', 'error'));
+              alertSpy.restore();
+              done();
+              })
+
+            });
+          });
+
+          it('should show default error message when failed to retrieve source mappings', function(done){
+            element.selectedSite = selectedSite;
+            var promise = element._getRouteMappingsForSite(selectedSite);
+            var alertSpy = sinon.spy(element.querySelector('#bahUtility'), 'alert');
+
+            requests[0].respond(401, {'Content-Type': 'application/json'}, null);
+
+            promise.then(function() {},
+             function(error) {
+              element.debounce('waitForCall', function() {
+              // verify we respond with error message if there is one
+              assert.isTrue(alertSpy.called);
+              assert.isTrue(alertSpy.calledWith('Error', 'There was an error retrieving mappings for this site.'));
+              alertSpy.restore();
+              done();
+              })
+            });
+          });
+
+          it('should show default error message for failed json parse when failed to retrieve source mappings', function(done){
+            element.selectedSite = selectedSite;
+            var promise = element._getRouteMappingsForSite(selectedSite);
+            var alertSpy = sinon.spy(element.querySelector('#bahUtility'), 'alert');
+
+            requests[0].respond(401, {'Content-Type': 'application/json'}, "error");
+
+            promise.then(function() {},
+             function(error) {
+              element.debounce('waitForCall', function() {
+              // verify we respond with error message if there is one
+              assert.isTrue(alertSpy.called);
+              assert.isTrue(alertSpy.calledWith('Error', 'There was an error retrieving mappings for this site.'));
+              alertSpy.restore();
+              done();
+              })
+            });
+          });
+
+          it('should get unmapped routes for particular site', function(done) {
+            //create needed elements
+            element.selectedSite = selectedSite;
+            var promise = element._getRouteMappingsForSite(selectedSite);
+
+            requests[0].respond(200, {'Content-Type': 'application/json'}, JSON.stringify({'data': unmappedRouteData}));
+
+            promise.then(function(response) {
+              element.debounce('waitForCall', function() {
+                assert.isNotNull(response);
+                var routeData = _.map(response.data, (item) => {
+                    return {
+                      id: item.id,
+                      sourceId: item.sourceId,
+                      sourceName: item.sourceName,
+                      siteId: item.siteId,
+                      alertDefinitionId: item.alertDefinitionId || 'Select Alert Definition'
+                    }
+                  });
+
+                element.debounce('waitForSets', function() {
+                  assert.strictEqual(element._loadingMappings.isLoading, false);
+                  assert.strictEqual(element._loadingMappings.hasError, false);
+                  assert.strictEqual(element._routeMappingsData[0].id, routeData[0].id);
+                  done();
+                }, 700)
+              });
+            })
+          });
+        });
+      });
+
+      describe('_notifyUser', function () {
+        it('should notify the user with string type error message', function() {
+          var element = fixture('basic');
+          var alertSpy = sinon.spy(element.querySelector('#bahUtility'), 'alert');
+          var errorObj = {
+            message: '{"message": "error message"}'
+          }
+          element._notifyUser(errorObj);
+          assert.isOk(alertSpy.called);
+        });
+
+        it('should notify the user with object type error message', function() {
+          var element = fixture('basic');
+          var alertSpy = sinon.spy(element.querySelector('#bahUtility'), 'alert');
+          var errorObj = {
+            message: {
+              "message": "error message"
+            }
+          }
+          element._notifyUser(errorObj);
+          assert.isOk(alertSpy.called);
+        });
+      });
+    </script>
+  </body>
+</html>
